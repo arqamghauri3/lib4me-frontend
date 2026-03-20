@@ -10,7 +10,7 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "jamesclear.com",
+        hostname: "i.gr-assets.com",
       },
     ],
   },

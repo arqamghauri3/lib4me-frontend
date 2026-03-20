@@ -10,7 +10,7 @@ const Page = () => {
     <SidebarProvider>
       <AppSidebar />
       <main className="flex h-screen w-full flex-col">
-        <div className="flex w-full bg-white py-3">
+        <div className="flex w-full bg-white py-4">
           <SidebarTrigger />
           <Topbar />
         </div>
