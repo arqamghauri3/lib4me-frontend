@@ -48,7 +48,7 @@ function BookSection() {
         "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
     },
     {
-      id: "5",
+      id: "6",
       name: "Atomic Habits",
       author: "James Clear",
       genre: ["Productivity"],
@@ -66,19 +66,19 @@ function BookSection() {
         <Button
           onClick={() => onSelectedChange(1)}
           variant={"ghost"}
-          className={`w-[100px] cursor-pointer rounded-full ${selectedOption == 1 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
+          className={`w-[100px] cursor-pointer rounded-full font-bold ${selectedOption == 1 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
         >
           Popular
         </Button>
         <Button
           onClick={() => onSelectedChange(2)}
-          className={`w-[100px] cursor-pointer rounded-full ${selectedOption == 2 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
+          className={`w-[100px] cursor-pointer rounded-full font-bold ${selectedOption == 2 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
         >
           Trending
         </Button>
         <Button
           onClick={() => onSelectedChange(3)}
-          className={`w-[100px] cursor-pointer rounded-full ${selectedOption == 3 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
+          className={`w-[100px] cursor-pointer rounded-full font-bold ${selectedOption == 3 ? "bg-[#273a51] text-white" : "bg-[#f1f6ff] text-black"}`}
         >
           New
         </Button>
