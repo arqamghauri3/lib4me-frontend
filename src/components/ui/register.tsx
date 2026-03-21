@@ -17,7 +17,7 @@ import { Checkbox } from "./checkbox";
 import { Button } from "./button";
 import Link from "next/link";
 
-const LoginForm = () => {
+const RegisterForm = () => {
   return (
     <section className="bg-foreground dark:bg-background relative flex min-h-screen items-center justify-center">
       <div className="pointer-events-none absolute inset-0 right-0 hidden overflow-hidden md:block">
@@ -35,14 +35,14 @@ const LoginForm = () => {
                 Welcome to Lib4Me
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm font-normal">
-                Login to your account now
+                Register your account now
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             <form>
               <FieldGroup className="gap-6">
-                <Field className="grid gap-3 md:grid-cols-2 md:gap-6">
+                <Field className="grid grid-cols-1">
                   <Button
                     variant="outline"
                     type="button"
@@ -53,31 +53,44 @@ const LoginForm = () => {
                       alt="google icon"
                       className="h-4 w-4"
                     />
-                    Sign in with Google
-                  </Button>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    className="text-medium text-card-foreground dark:bg-background h-9 cursor-pointer gap-2 rounded-lg text-sm shadow-xs"
-                  >
-                    <img
-                      src="https://images.shadcnspace.com/assets/svgs/icon-github.svg"
-                      alt="github icon"
-                      className="h-4 w-4 dark:hidden"
-                    />
-                    <img
-                      src="https://images.shadcnspace.com/assets/svgs/icon-github-white.svg"
-                      alt="github icon"
-                      className="hidden h-4 w-4 dark:block"
-                    />
-                    Sign in with Github
+                    Sign up with Google
                   </Button>
                 </Field>
                 <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card text-muted-foreground bg-transparent text-sm">
-                  <span className="px-4">or sign in with</span>
+                  <span className="px-4">or sign up with</span>
                 </FieldSeparator>
 
                 <div className="flex flex-col gap-4">
+                  <Field className="gap-1.5">
+                    <FieldLabel
+                      htmlFor="name"
+                      className="text-muted-foreground text-sm font-normal"
+                    >
+                      Name*
+                    </FieldLabel>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Jack Smith"
+                      required
+                      className="dark:bg-background h-9 shadow-xs"
+                    />
+                  </Field>
+                  <Field className="gap-1.5">
+                    <FieldLabel
+                      htmlFor="username"
+                      className="text-muted-foreground text-sm font-normal"
+                    >
+                      Username*
+                    </FieldLabel>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="jacksmith123"
+                      required
+                      className="dark:bg-background h-9 shadow-xs"
+                    />
+                  </Field>
                   <Field className="gap-1.5">
                     <FieldLabel
                       htmlFor="email"
@@ -110,44 +123,21 @@ const LoginForm = () => {
                     />
                   </Field>
                 </div>
-
-                <Field orientation="horizontal" className="justify-between">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="terms"
-                      defaultChecked
-                      className="cursor-pointer"
-                    />
-                    <FieldLabel
-                      htmlFor="terms"
-                      className="text-primary cursor-pointer text-sm font-normal"
-                    >
-                      Remember this device
-                    </FieldLabel>
-                  </div>
-                  <a
-                    href="#"
-                    className="text-card-foreground text-end text-sm font-medium"
-                  >
-                    Forgot password?
-                  </a>
-                </Field>
-
                 <Field className="gap-4">
                   <Button
                     type="submit"
                     size={"lg"}
                     className="hover:bg-primary/80 h-10 cursor-pointer rounded-lg"
                   >
-                    Sign in
+                    Sign Up
                   </Button>
                   <FieldDescription className="text-muted-foreground text-center text-sm font-normal">
-                    Don&apos;t have an account?{" "}
+                    Already have an account?{" "}
                     <Link
-                      href="/auth/register"
+                      href="/auth/login"
                       className="text-card-foreground font-medium no-underline!"
                     >
-                      Create an account
+                      Login
                     </Link>
                   </FieldDescription>
                 </Field>
@@ -160,4 +150,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
