@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const res = await fetch(`https://openlibrary.org/trending/daily.json?limit=10`);
+    const res = await fetch(`https://openlibrary.org/search.json?q=popular&sort=readinglog&limit=10&fields=key,title,author_name,first_publish_year,publisher,number_of_pages_median,ratings_average,ratings_count,cover_i,subject`);
     if (!res.ok) {
       return NextResponse.json(
         { error: "Failed to fetch from Open Library" },
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
 
-    const books = (data.works || []).map((book: any) => ({
+    const books = (data.docs || []).map((book: any) => ({
       id: book.key.replace("/works/", ""),
       key: book.key,
       title: book.title || null,
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ books });
   } catch (error) {
-    console.error("Open Library proxy error:", error);
+    console.error("Open Library popular proxy error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

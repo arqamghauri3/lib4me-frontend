@@ -12,6 +12,12 @@ const fetchBookDetail = async (id: string) => {
   return res.json();
 };
 
+const fetchBookLg = async (query: string) => {
+  const res = await fetch(`/api/lg/search?req=${query}`);
+
+  if (!res.ok) throw new Error("Fetch failed");
+  return res.json();
+};
 const Page = () => {
   const params = useParams<{ id: string }>();
   const {
@@ -24,9 +30,19 @@ const Page = () => {
     enabled: !!params.id,
   });
 
+  const {
+    data: bookLg,
+  } = useQuery({
+    queryKey: ["bookLg", booksData?.title],
+    queryFn: () => fetchBookLg(booksData?.title),
+    enabled: !!booksData?.title,
+  });
+
   useEffect(() => {
+    
     console.log(booksData);
-  }, [booksData]);
+    console.log(bookLg);
+  }, [booksData,bookLg]);
 
   const book = {
     id: booksData?.id,
@@ -34,7 +50,7 @@ const Page = () => {
     author: Array.isArray(booksData?.authors)
       ? booksData.authors.join(", ")
       : booksData?.authors || "Unknown Author",
-    summary: booksData?.description || "Loading description...",
+    summary:"Loading description...",
     description: booksData?.description || "",
     image: booksData?.image || "/placeholder-book.jpg",
     publisher: booksData?.publisher || "N/A",
@@ -53,14 +69,12 @@ const Page = () => {
       <div className="z-10 mx-auto grid w-full max-w-7xl grid-cols-12 gap-8 px-8 lg:px-12">
         {/* Book Cover */}
         <div className="relative col-span-12 flex justify-center md:col-span-5 lg:col-span-4 lg:col-start-2 lg:justify-end">
-          <div className="relative z-20 w-64 overflow-hidden rounded-sm shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] transition-transform duration-500 hover:scale-[1.02] md:w-80">
+          <div className="relative z-20 w-[320px] h-[480px] shrink-0 overflow-hidden rounded-sm shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] transition-transform duration-500 hover:scale-[1.02]">
             <Image
               src={book.image}
               alt="book cover"
-              width={320}
-              height={480}
-              className="block h-auto w-full object-cover"
-              priority
+              fill
+              className="object-fill"
             />
           </div>
         </div>
@@ -71,9 +85,6 @@ const Page = () => {
             {book.name}
           </h1>
           <h3 className="mb-4 text-lg font-semibold">{book.author}</h3>
-          <p className="text-muted-foreground max-w-md text-sm leading-relaxed font-semibold italic">
-            {book.summary}
-          </p>
         </div>
       </div>
 
@@ -88,8 +99,12 @@ const Page = () => {
                 <button className="bg-primary text-primary-foreground flex w-full items-center justify-center rounded-full px-8 py-4 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]">
                   Start reading instantly ↗
                 </button>
-                <button className="bg-secondary text-foreground hover:bg-muted border-border/50 flex w-full items-center justify-center rounded-full border px-8 py-4 text-sm font-semibold transition-colors">
-                  Buy Physical Copy - $24.99
+                <button 
+                  onClick={() => bookLg?.downloadUrl && window.open(bookLg.downloadUrl, "_blank")}
+                  disabled={!bookLg?.downloadUrl}
+                  className="bg-secondary text-foreground hover:bg-muted border-border/50 flex w-full items-center justify-center rounded-full border px-8 py-4 text-sm font-semibold transition-colors disabled:opacity-50"
+                >
+                  {bookLg?.downloadUrl ? "Download Now" : "Searching for download..."}
                 </button>
               </div>
 
@@ -202,49 +217,6 @@ const Page = () => {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Editorial Reviews */}
-              <div className="border-border/60 border-t pt-12">
-                <h3 className="mb-8 font-serif text-3xl font-normal">
-                  Editorial Reviews
-                </h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {book.reviews.length > 0 ? (
-                    book.reviews.map((r: any, i: number) => (
-                      <div key={i} className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
-                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
-                          "{r.text}"
-                        </p>
-                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                          {r.source || "Editorial Review"}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <>
-                      <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
-                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
-                          "A stunning continuation of the series. Hogwarts has never
-                          felt darker, nor more engrossing. Rowling balances teen
-                          angst with apocalyptic threat perfectly."
-                        </p>
-                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                          The New York Times
-                        </p>
-                      </div>
-                      <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
-                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
-                          "What a delightful and magical book it is! It indeed
-                          transports readers to the wizarding world."
-                        </p>
-                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                          Roberto Jordan
-                        </p>
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
