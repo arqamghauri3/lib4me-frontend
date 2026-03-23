@@ -12,6 +12,18 @@ const config = {
         protocol: "https",
         hostname: "i.gr-assets.com",
       },
+      {
+        protocol: "https",
+        hostname: "xsgames.co",
+      },
+      {
+        protocol: "https",
+        hostname: "images-na.ssl-images-amazon.com",
+      },
+      {
+        protocol: "https",
+        hostname: "covers.openlibrary.org",
+      },
     ],
   },
 };

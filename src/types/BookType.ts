@@ -1,8 +1,9 @@
 export type book = {
-    id: string,
+    id: number,
     image: string,
     name: string,
     author: string,
     genre: string[],
+    description?: string,
     releaseDate?: Date
 }

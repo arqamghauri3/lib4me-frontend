@@ -1,61 +1,51 @@
-import { Bookmark, Compass, Home, Plus, Settings } from "lucide-react";
+import { Bookmark, Compass, Home, Settings, Navigation } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
 
 export function AppSidebar() {
   return (
-    <Sidebar color="white">
-      <SidebarHeader>
-        <div>Image</div>
+    <Sidebar className="w-[80px] min-w-[80px] border-r-0">
+      <SidebarHeader className="flex flex-col items-center justify-center py-8">
+        <Navigation size={28} strokeWidth={1.5} className="text-foreground" />
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenuItem className="px-5 py-2">
-            <SidebarMenuButton asChild>
-              <a href="#">
-                <Home />
-                <span>Home</span>
+      <SidebarContent className="flex flex-col items-center mt-6">
+        <SidebarGroup className="w-full flex flex-col items-center gap-6">
+          <SidebarMenuItem className="list-none flex justify-center w-full">
+            <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
+              <a href="/dashboard">
+                <Home size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem className="px-5 py-2">
-            <SidebarMenuButton asChild>
+          <SidebarMenuItem className="list-none flex justify-center w-full">
+            <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
               <a href="#">
-                <Compass />
-                <span>Discover</span>
+                <Compass size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem className="px-5 py-2">
-            <SidebarMenuButton asChild>
+          <SidebarMenuItem className="list-none flex justify-center w-full">
+            <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
               <a href="#">
-                <Bookmark />
-                <span>Bookmark</span>
+                <Bookmark size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem className="px-5 py-2">
-            <SidebarMenuButton asChild>
+          <SidebarMenuItem className="list-none flex justify-center w-full">
+            <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
               <a href="#">
-                <Settings />
-                <span>Settings</span>
+                <Settings size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarGroupContent></SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup />
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
