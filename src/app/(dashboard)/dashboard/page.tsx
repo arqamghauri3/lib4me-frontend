@@ -18,7 +18,7 @@ const Page = () => {
 
   const searchBook = async () => {
     const res = await fetch(
-      `/api/libgen/search?api-key=4d05429686504daaa0d31127ebf1a770&query=books+about+wizards`,
+      `/api/libgen/search?api-key=4d05429686504daaa0d31127ebf1a770&query=trending+books`,
     );
 
     if (!res.ok) throw new Error("Search failed");

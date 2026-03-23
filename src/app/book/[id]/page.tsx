@@ -36,7 +36,6 @@ const Page = () => {
       : booksData?.authors || "Unknown Author",
     summary: booksData?.description || "Loading description...",
     description: booksData?.description || "",
-    description2: "",
     image: booksData?.image || "/placeholder-book.jpg",
     publisher: booksData?.publisher || "N/A",
     language: booksData?.language || "English",
@@ -44,6 +43,8 @@ const Page = () => {
     releaseDate: booksData?.releaseDate || "N/A",
     rating: booksData?.rating || "0.0",
     ratingsCount: booksData?.ratingsCount || "0",
+    genres: booksData?.genres || [],
+    reviews: booksData?.reviews || [],
   };
 
   return (
@@ -143,9 +144,6 @@ const Page = () => {
                 <p className="text-foreground/80 text-[15px] leading-relaxed font-medium">
                   {book.description}
                 </p>
-                <p className="text-foreground/80 text-[15px] leading-relaxed font-medium">
-                  {book.description2}
-                </p>
               </div>
 
               {/* Metadata Grid */}
@@ -183,15 +181,24 @@ const Page = () => {
                       Tags
                     </h4>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {["Fantasy", "Magic", "Young Adult", "Fiction"].map(
-                        (t) => (
+                      {book.genres.length > 0 ? (
+                        book.genres.map((t: string) => (
                           <span
                             key={t}
                             className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
                           >
                             {t}
                           </span>
-                        ),
+                        ))
+                      ) : (
+                        ["Fantasy", "Fiction"].map((t) => (
+                          <span
+                            key={t}
+                            className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
+                          >
+                            {t}
+                          </span>
+                        ))
                       )}
                     </div>
                   </div>
@@ -204,25 +211,40 @@ const Page = () => {
                   Editorial Reviews
                 </h3>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
-                    <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
-                      "A stunning continuation of the series. Hogwarts has never
-                      felt darker, nor more engrossing. Rowling balances teen
-                      angst with apocalyptic threat perfectly."
-                    </p>
-                    <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                      The New York Times
-                    </p>
-                  </div>
-                  <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
-                    <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
-                      "What a delightful and magical book it is! It indeed
-                      transports readers to the wizarding world."
-                    </p>
-                    <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                      Roberto Jordan
-                    </p>
-                  </div>
+                  {book.reviews.length > 0 ? (
+                    book.reviews.map((r: any, i: number) => (
+                      <div key={i} className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
+                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
+                          "{r.text}"
+                        </p>
+                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
+                          {r.source || "Editorial Review"}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
+                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
+                          "A stunning continuation of the series. Hogwarts has never
+                          felt darker, nor more engrossing. Rowling balances teen
+                          angst with apocalyptic threat perfectly."
+                        </p>
+                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
+                          The New York Times
+                        </p>
+                      </div>
+                      <div className="bg-secondary/40 border-border/30 rounded-2xl border p-8">
+                        <p className="text-foreground/90 mb-6 text-[15px] leading-relaxed font-medium italic">
+                          "What a delightful and magical book it is! It indeed
+                          transports readers to the wizarding world."
+                        </p>
+                        <p className="text-foreground text-xs font-bold tracking-wider uppercase">
+                          Roberto Jordan
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

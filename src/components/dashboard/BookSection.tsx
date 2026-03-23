@@ -1,54 +1,42 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { book } from "~/types/BookType";
 import Book from "../ui/book";
 import { Button } from "../ui/button";
 import Link from "next/link";
-
+import { useQuery } from "@tanstack/react-query";
 function BookSection() {
+  const searchBook = async () => {
+    const res = await fetch(
+      `/api/libgen/trending`,
+    );
+
+    if (!res.ok) throw new Error("Search failed");
+    return res.json();
+  };
+
+  const {
+    data: booksData,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ["book"],
+    queryFn: () => searchBook(),
+  });
+  useEffect(() => {
+    console.log(booksData);
+  }, [booksData]);
   const [selectedOption, setSelectedOption] = useState(1);
-  let books: book[] = [
-    {
-      id: 1,
-      name: "Atomic Habits",
-      author: "James Clear",
-      genre: ["Productivity"],
-      image:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
-    },
-    {
-      id: 2,
-      name: "Atomic Habits",
-      author: "James Clear",
-      genre: ["Productivity"],
-      image:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
-    },
-    {
-      id: 3,
-      name: "Atomic Habits",
-      author: "James Clear",
-      genre: ["Productivity"],
-      image:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
-    },
-    {
-      id: 4,
-      name: "Atomic Habits",
-      author: "James Clear",
-      genre: ["Productivity"],
-      image:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
-    },
-    {
-      id: 5,
-      name: "Atomic Habits",
-      author: "James Clear",
-      genre: ["Productivity"],
-      image:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1655988385l/40121378.jpg",
-    },
-  ];
+  const books: book[] = booksData?.books?.map((b: any) => ({
+    id: b.id,
+    name: b.title,
+    author: Array.isArray(b.authors) ? b.authors.join(", ") : b.authors || "Unknown Author",
+    genre: b.genres || [],
+    image: b.image || "/placeholder-book.jpg"
+  })) || [];
+
+  if (isPending) return <div className="p-10 text-center font-serif text-xl">Loading trending books...</div>;
+  if (error) return <div className="p-10 text-center font-serif text-xl text-destructive">Error loading books</div>;
 
   const onSelectedChange = (value: number) => {
     setSelectedOption(value);

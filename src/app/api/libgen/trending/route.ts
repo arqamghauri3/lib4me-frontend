@@ -1,17 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("query") || "books";
-  
-  const params = new URLSearchParams({
-    q: query,
-    limit: "10",
-    fields: "key,title,author_name,first_publish_year,publisher,number_of_pages_median,ratings_average,ratings_count,cover_i,subject",
-  });
-
   try {
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`);
+    const res = await fetch(`https://openlibrary.org/trending/daily.json`);
     if (!res.ok) {
       return NextResponse.json(
         { error: "Failed to fetch from Open Library" },
@@ -20,8 +11,9 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await res.json();
+    console.log((data.works || []).slice(0, 2));
 
-    const books = data.docs.map((book: any) => ({
+    const books = (data.works || []).map((book: any) => ({
       id: book.key.replace("/works/", ""),
       key: book.key,
       title: book.title || null,
