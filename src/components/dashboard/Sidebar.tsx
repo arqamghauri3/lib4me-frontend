@@ -1,4 +1,4 @@
-import { Bookmark, Compass, Home, Settings, Navigation } from "lucide-react";
+import { Bookmark, Compass, Home, Settings, Navigation, Library } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,13 @@ export function AppSidebar() {
             <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
               <a href="#">
                 <Compass size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem className="list-none flex justify-center w-full">
+            <SidebarMenuButton className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-muted transition-colors" asChild>
+              <a href="/library">
+                <Library size={22} strokeWidth={1.5} className="text-foreground/80 hover:text-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
