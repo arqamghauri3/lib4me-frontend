@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -16,8 +18,48 @@ import { Input } from "./input";
 import { Checkbox } from "./checkbox";
 import { Button } from "./button";
 import Link from "next/link";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+const schema = z.object({
+  username: z.string().min(3, "Invalid  username"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type loginType = z.infer<typeof schema>;
+
+const loginUser = async (data: loginType) => {
+  const res = await axios.post("/api/auth/login", data);
+  return res.data;
+};
 
 const LoginForm = () => {
+  const router = useRouter();
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      console.log("Login successful:", data);
+      // In the future, you might want to set a cookie or global state here
+      router.push("/dashboard");
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<loginType>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit: SubmitHandler<loginType> = (data) => {
+    mutation.mutate(data);
+  };
+
   return (
     <section className="bg-foreground dark:bg-background relative flex min-h-screen items-center justify-center">
       <div className="pointer-events-none absolute inset-0 right-0 hidden overflow-hidden md:block">
@@ -40,7 +82,7 @@ const LoginForm = () => {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <FieldGroup className="gap-6">
                 <Field className="grid gap-3 md:grid-cols-2 md:gap-6">
                   <Button
@@ -80,18 +122,22 @@ const LoginForm = () => {
                 <div className="flex flex-col gap-4">
                   <Field className="gap-1.5">
                     <FieldLabel
-                      htmlFor="email"
+                      htmlFor="username"
                       className="text-muted-foreground text-sm font-normal"
                     >
-                      Email*
+                      Username*
                     </FieldLabel>
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="example@shadcnspace.com"
+                      id="username"
+                      type="text"
+                      placeholder="jack123"
                       required
+                      {...register("username")}
                       className="dark:bg-background h-9 shadow-xs"
                     />
+                    {errors.username && (
+                      <p className="text-xs text-red-400">{errors.username.message}</p>
+                    )}
                   </Field>
                   <Field className="gap-1.5">
                     <FieldLabel
@@ -106,8 +152,12 @@ const LoginForm = () => {
                       type="password"
                       placeholder="Enter your password"
                       required
+                      {...register("password")}
                       className="dark:bg-background h-9 shadow-xs"
                     />
+                    {errors.password && (
+                      <p className="text-xs text-red-400">{errors.password.message}</p>
+                    )}
                   </Field>
                 </div>
 
@@ -134,12 +184,18 @@ const LoginForm = () => {
                 </Field>
 
                 <Field className="gap-4">
+                  {mutation.isError && (
+                    <p className="text-sm font-medium text-red-400 text-center">
+                      {(mutation.error as any).response?.data?.error || "Login failed. Please check your credentials."}
+                    </p>
+                  )}
                   <Button
                     type="submit"
                     size={"lg"}
+                    disabled={mutation.isPending}
                     className="hover:bg-primary/80 h-10 cursor-pointer rounded-lg"
                   >
-                    Sign in
+                    {mutation.isPending ? "Logging in..." : "Sign in"}
                   </Button>
                   <FieldDescription className="text-muted-foreground text-center text-sm font-normal">
                     Don&apos;t have an account?{" "}
