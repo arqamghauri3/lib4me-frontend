@@ -15,7 +15,22 @@ type contentProps = {
   };
 };
 
+
+
 const Content = ({ ContentProps }: { ContentProps: contentProps }) => {
+  const { data: userData } = useQuery({
+  queryKey: ["user"],
+  queryFn: async() => {
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) throw new Error("Failed to fetch user");
+    return res.json();
+  },
+});
+
+useEffect(()=>{
+  console.log(userData)
+},[userData]) 
+
   const bookData = ContentProps.bookData;
   const searchLibgen = async ({ type = "title", page = 1 }) => {
     const res = await fetch(
@@ -97,7 +112,7 @@ const Content = ({ ContentProps }: { ContentProps: contentProps }) => {
         {/* Header */}
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-foreground font-serif text-4xl font-normal tracking-tight lg:text-5xl">
-            Good Morning, Alexander Mark
+            Good Morning, {userData?.name || "Member"}
           </h1>
           <p className="text-muted-foreground mt-2 mb-2 text-lg font-semibold italic">
             Here is what you are reading today

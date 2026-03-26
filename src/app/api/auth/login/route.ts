@@ -6,7 +6,7 @@ const server = `http://localhost:8080`;
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
-    
+
     const response = await apiFetch("/login", {
       method: "POST",
       headers: {
@@ -22,17 +22,21 @@ export async function POST(request: NextRequest) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
         { error: errorData.message || "Invalid credentials" },
-        { status: response.status }
+        { status: response.status },
       );
     }
-
     const data = await response.json();
-    return NextResponse.json(data);
+    const setCookie = response.headers.get("set-cookie") || null;
+    const nextRes = NextResponse.json(data);
+    if (setCookie) {
+      nextRes.headers.set("Set-Cookie", setCookie);
+    }
+    return nextRes;
   } catch (error: any) {
     console.error("Login error:", error.message);
     return NextResponse.json(
       { error: "Server error during login" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -47,4 +51,3 @@ export async function apiFetch(path: string, options: any = {}) {
 
   return res;
 }
-
