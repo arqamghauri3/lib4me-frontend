@@ -5,35 +5,35 @@ import Book from "../ui/book";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-function BookSection() {
+
+type BookSectionProps = {
+  bookData: {
+    trendingBooks: any;
+    popularBooks: any;
+    newBooks: any;
+  };
+};
+
+function BookSection({
+  BookSectionProps,
+}: {
+  BookSectionProps: BookSectionProps;
+}) {
   const [selectedOption, setSelectedOption] = useState(2);
+  const bookData = BookSectionProps.bookData;
 
-  const searchBook = async (option: number) => {
-    const endpoint =
-      option === 1
-        ? "/api/libgen/popular"
-        : option === 2
-          ? "/api/libgen/trending"
-          : "/api/libgen/search?query=new+books";
-    const res = await fetch(endpoint);
-
-    if (!res.ok) throw new Error("Fetch failed");
-    return res.json();
+  const onSelectedChange = (value: number) => {
+    setSelectedOption(value);
   };
 
-  const {
-    data: booksData,
-    isPending,
-    error,
-  } = useQuery({
-    queryKey: ["books", selectedOption],
-    queryFn: () => searchBook(selectedOption),
-  });
-  useEffect(() => {
-    console.log(booksData);
-  }, [booksData]);
-  const books: book[] =
-    booksData?.books?.map((b: any) => ({
+
+  const books: book[] = (() => {
+    let bookToSelect = [];
+    if (selectedOption === 1) bookToSelect = bookData.popularBooks;
+    if (selectedOption === 2) bookToSelect = bookData.trendingBooks;
+    if (selectedOption === 3) bookToSelect = bookData.newBooks;
+    
+    return bookToSelect?.map((b: any) => ({
       id: b.id,
       name: b.title,
       author: Array.isArray(b.authors)
@@ -42,17 +42,8 @@ function BookSection() {
       genre: b.genres || [],
       image: b.image || "/placeholder-book.jpg",
     })) || [];
+  })();
 
-  if (isPending)
-    return (
-      <div className="p-10 text-center font-serif text-xl">
-        Loading trending books...
-      </div>
-    );
-
-  const onSelectedChange = (value: number) => {
-    setSelectedOption(value);
-  };
   return (
     <div className="bg-card border-border/40 text-foreground w-full rounded-2xl border p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.03)] lg:p-10">
       <div className="border-border/40 mb-8 flex gap-4 border-b pb-6">
@@ -79,17 +70,11 @@ function BookSection() {
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {error ? (
-          <div className="text-destructive p-10 text-center font-serif text-xl">
-            Error loading books
-          </div>
-        ) : (
-          books.map((book, index) => (
-            <Link key={book.id?.toString() || index} href={`/book/${book.id}`}>
-              <Book BookProps={book} />
-            </Link>
-          ))
-        )}
+        {books.map((book, index) => (
+          <Link key={book.id?.toString() || index} href={`/book/${book.id}`}>
+            <Book BookProps={book} />
+          </Link>
+        ))}
       </div>
     </div>
   );
