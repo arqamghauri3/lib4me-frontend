@@ -14,127 +14,84 @@ import {
   Plus,
   MoreHorizontal,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { Library, LibraryBooks } from "~/types";
 
-type LibraryBook = {
-  id: string;
-  title: string;
-  author: string;
-  image: string;
-  rating: number;
-  genre: string;
-  status: "reading" | "completed" | "want-to-read";
-  progress?: number; // percentage for "reading"
-  dateAdded: string;
-  pages: number;
-  pagesRead?: number;
-};
 
-const dummyBooks: LibraryBook[] = [
+
+const dummyBooks: LibraryBooks[] = [
   {
-    id: "OL7353617M",
-    title: "Harry Potter and the Half-Blood Prince",
-    author: "J.K. Rowling",
-    image: "https://covers.openlibrary.org/b/id/8234817-L.jpg",
-    rating: 4.6,
-    genre: "Fantasy",
-    status: "reading",
-    progress: 62,
-    pages: 607,
-    pagesRead: 376,
-    dateAdded: "2026-03-01",
+    id: 1,
+    status: "READING",
+    startedAt: "2026-03-01",
+    finishedAt: null,
+    readPages: 376,
+    notes: null,
+    book: {
+      title: "Harry Potter and the Half-Blood Prince",
+      key: "OL7353617M",
+      author: { name: "J.K. Rowling", key: "OL23919A" },
+      image: "https://covers.openlibrary.org/b/id/8234817-L.jpg",
+      description: "Harry Potter and the Half-Blood Prince is a fantasy novel...",
+      pages: 607,
+      ratings: 4.6,
+      releaseDate: 2005,
+      publisher: "Bloomsbury",
+      genreList: [{ name: "Fantasy", key: "fantasy" }],
+    },
   },
   {
-    id: "OL8479946M",
-    title: "The Name of the Wind",
-    author: "Patrick Rothfuss",
-    image: "https://covers.openlibrary.org/b/id/8235174-L.jpg",
-    rating: 4.5,
-    genre: "Fantasy",
-    status: "reading",
-    progress: 34,
-    pages: 662,
-    pagesRead: 225,
-    dateAdded: "2026-03-10",
+    id: 2,
+    status: "READING",
+    startedAt: "2026-03-10",
+    finishedAt: null,
+    readPages: 225,
+    notes: null,
+    book: {
+      title: "The Name of the Wind",
+      key: "OL8479946M",
+      author: {  name: "Patrick Rothfuss", key: "OL4336142A" },
+      image: "https://covers.openlibrary.org/b/id/8235174-L.jpg",
+      description: "The Name of the Wind is a heroic fantasy novel...",
+      pages: 662,
+      ratings: 4.5,
+      releaseDate: 2007,
+      publisher: "DAW Books",
+      genreList: [{  name: "Fantasy", key: "fantasy" }],
+    },
   },
   {
-    id: "OL44247403M",
-    title: "Dune",
-    author: "Frank Herbert",
-    image: "https://covers.openlibrary.org/b/id/8225263-L.jpg",
-    rating: 4.8,
-    genre: "Sci-Fi",
+    id: 3,
     status: "completed",
-    pages: 412,
-    dateAdded: "2026-01-15",
-  },
-  {
-    id: "OL7353618M",
-    title: "1984",
-    author: "George Orwell",
-    image: "https://covers.openlibrary.org/b/id/8575708-L.jpg",
-    rating: 4.7,
-    genre: "Dystopian",
-    status: "completed",
-    pages: 328,
-    dateAdded: "2026-02-05",
-  },
-  {
-    id: "OL18417M",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    image: "https://covers.openlibrary.org/b/id/8432047-L.jpg",
-    rating: 4.2,
-    genre: "Classic",
-    status: "completed",
-    pages: 180,
-    dateAdded: "2026-02-20",
-  },
-  {
-    id: "OL7353619M",
-    title: "Mistborn: The Final Empire",
-    author: "Brandon Sanderson",
-    image: "https://covers.openlibrary.org/b/id/8379615-L.jpg",
-    rating: 4.7,
-    genre: "Fantasy",
-    status: "want-to-read",
-    pages: 541,
-    dateAdded: "2026-03-18",
-  },
-  {
-    id: "OL1532283M",
-    title: "The Hitchhiker's Guide to the Galaxy",
-    author: "Douglas Adams",
-    image: "https://covers.openlibrary.org/b/id/8406786-L.jpg",
-    rating: 4.6,
-    genre: "Sci-Fi",
-    status: "want-to-read",
-    pages: 224,
-    dateAdded: "2026-03-22",
-  },
-  {
-    id: "OL2345681M",
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    image:
-      "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1654371463i/18144590.jpg",
-    rating: 4.3,
-    genre: "Fiction",
-    status: "want-to-read",
-    pages: 208,
-    dateAdded: "2026-03-23",
+    startedAt: "2026-01-01",
+    finishedAt: "2026-01-15",
+    readPages: 412,
+    notes: null,
+    book: {
+      title: "Dune",
+      key: "OL44247403M",
+      author: {  name: "Frank Herbert", key: "OL21516A" },
+      image: "https://covers.openlibrary.org/b/id/8225263-L.jpg",
+      description: "Dune is a science fiction novel...",
+      pages: 412,
+      ratings: 4.8,
+      releaseDate: 1965,
+      publisher: "Chilton Books",
+      genreList: [{  name: "Sci-Fi", key: "sci-fi" }],
+    },
   },
 ];
 
 const filterTabs = [
   { key: "all", label: "All Books", icon: BookMarked },
-  { key: "reading", label: "Reading", icon: BookOpen },
+  { key: "READING", label: "Reading", icon: BookOpen },
   { key: "completed", label: "Completed", icon: CheckCircle2 },
   { key: "want-to-read", label: "Want to Read", icon: Clock },
 ];
 
 const statusConfig = {
-  reading: {
+  READING: {
     label: "Reading",
     color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     dot: "bg-blue-500",
@@ -160,23 +117,32 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function BookCard({ book }: { book: LibraryBook }) {
+function BookCard({
+  book,
+}: {
+  book: LibraryBooks;
+}) {
   const status = statusConfig[book.status];
   return (
-    <Link href={`/book/${book.id}`}>
+    <Link href={`/book/${book.book.key}`}>
       <div className="bg-card border-border/40 group flex cursor-pointer flex-col overflow-hidden rounded-2xl border shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.08)]">
         {/* Cover */}
-        <div className="bg-secondary/40 relative w-full overflow-hidden" style={{ aspectRatio: "2/3" }}>
+        <div
+          className="bg-secondary/40 relative w-full overflow-hidden"
+          style={{ aspectRatio: "2/3" }}
+        >
           <Image
-            src={book.image}
-            alt={book.title}
+            src={book.book.image}
+            alt={book.book.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
           />
           {/* Status badge */}
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm ${status.color} bg-card/80`}>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm ${status.color} bg-card/80`}
+            >
               <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               {status.label}
             </span>
@@ -194,45 +160,49 @@ function BookCard({ book }: { book: LibraryBook }) {
         <div className="flex flex-col gap-2 p-4">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h3 className="text-foreground line-clamp-2 text-sm font-bold leading-snug">
-                {book.title}
+              <h3 className="text-foreground line-clamp-2 text-sm leading-snug font-bold">
+                {book.book.title}
               </h3>
               <p className="text-muted-foreground mt-1 text-xs font-semibold italic">
-                {book.author}
+                {book.book.author.name}
               </p>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            <StarRating rating={book.rating} />
+            <StarRating rating={book.book.ratings} />
             <span className="bg-secondary text-foreground/70 rounded-full px-2.5 py-0.5 text-[10px] font-bold">
-              {book.genre}
+              {book.book.genreList[0]?.name || "N/A"}
             </span>
           </div>
 
-          {/* Progress bar for "reading" */}
-          {book.status === "reading" && book.progress !== undefined && (
+          {/* Progress bar for "READING" */}
+          {book.status === "READING" && book.readPages !== null && (
             <div className="mt-1 flex flex-col gap-1.5">
               <div className="bg-secondary h-1.5 w-full overflow-hidden rounded-full">
                 <div
                   className="bg-primary h-full rounded-full transition-all duration-700"
-                  style={{ width: `${book.progress}%` }}
+                  style={{
+                    width: `${Math.round((book.readPages / book.book.pages) * 100)}%`,
+                  }}
                 />
               </div>
               <div className="text-muted-foreground flex justify-between text-[10px] font-semibold">
-                <span>{book.pagesRead} pages read</span>
-                <span>{book.progress}%</span>
+                <span>{book.readPages} pages read</span>
+                <span>
+                  {Math.round((book.readPages / book.book.pages) * 100)}%
+                </span>
               </div>
             </div>
           )}
           {book.status === "completed" && (
             <div className="text-muted-foreground mt-0.5 text-[10px] font-semibold">
-              {book.pages} pages · Finished
+              {book.book.pages} pages · Finished
             </div>
           )}
           {book.status === "want-to-read" && (
             <div className="text-muted-foreground mt-0.5 text-[10px] font-semibold">
-              {book.pages} pages
+              {book.book.pages} pages
             </div>
           )}
         </div>
@@ -242,33 +212,44 @@ function BookCard({ book }: { book: LibraryBook }) {
 }
 
 function Content() {
+  const { data: libraryBooks } = useQuery<Library>({
+    queryKey: ["libraryBooks"],
+    queryFn: async () => {
+      return (await fetch("/api/library")).json();
+    },
+  });
+
+  useEffect(() => {
+    console.log(libraryBooks);
+  }, [libraryBooks]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredBooks = dummyBooks.filter((b) => {
+  const books = libraryBooks?.books || dummyBooks;
+
+  const filteredBooks = books.filter((b) => {
     const matchesFilter = activeFilter === "all" || b.status === activeFilter;
     const matchesSearch =
-      b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.author.toLowerCase().includes(searchQuery.toLowerCase());
+      b.book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.book.author.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   const stats = {
-    total: dummyBooks.length,
-    reading: dummyBooks.filter((b) => b.status === "reading").length,
-    completed: dummyBooks.filter((b) => b.status === "completed").length,
-    wantToRead: dummyBooks.filter((b) => b.status === "want-to-read").length,
-    totalPagesRead: dummyBooks
+    total: books.length,
+    reading: books.filter((b) => b.status === "READING").length,
+    completed: books.filter((b) => b.status === "completed").length,
+    wantToRead: books.filter((b) => b.status === "want-to-read").length,
+    totalPagesRead: books
       .filter((b) => b.status === "completed")
-      .reduce((acc, b) => acc + b.pages, 0),
+      .reduce((acc, b) => acc + b.book.pages, 0),
   };
 
-  const currentlyReading = dummyBooks.filter((b) => b.status === "reading");
+  const currentlyReading = books.filter((b) => b.status === "READING");
 
   return (
-    <div className="bg-background text-foreground min-h-screen w-full pb-24 pt-12 font-sans">
+    <div className="bg-background text-foreground min-h-screen w-full pt-12 pb-24 font-sans">
       <div className="mx-auto flex w-full max-w-none flex-col gap-10 px-6 lg:px-10">
-
         {/* Header */}
         <div className="flex flex-col gap-2">
           <h1 className="font-serif text-4xl font-normal tracking-tight lg:text-5xl">
@@ -282,10 +263,30 @@ function Content() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { label: "Total Books", value: stats.total, icon: BookMarked, color: "text-foreground" },
-            { label: "Reading Now", value: stats.reading, icon: BookOpen, color: "text-blue-500" },
-            { label: "Completed", value: stats.completed, icon: CheckCircle2, color: "text-emerald-500" },
-            { label: "Pages Read", value: stats.totalPagesRead.toLocaleString(), icon: Star, color: "text-amber-500" },
+            {
+              label: "Total Books",
+              value: stats.total,
+              icon: BookMarked,
+              color: "text-foreground",
+            },
+            {
+              label: "Reading Now",
+              value: stats.reading,
+              icon: BookOpen,
+              color: "text-blue-500",
+            },
+            {
+              label: "Completed",
+              value: stats.completed,
+              icon: CheckCircle2,
+              color: "text-emerald-500",
+            },
+            {
+              label: "Pages Read",
+              value: stats.totalPagesRead.toLocaleString(),
+              icon: Star,
+              color: "text-amber-500",
+            },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
@@ -293,8 +294,12 @@ function Content() {
             >
               <Icon size={20} className={color} strokeWidth={1.5} />
               <div>
-                <p className={`font-serif text-3xl font-normal ${color}`}>{value}</p>
-                <p className="text-muted-foreground mt-1 text-xs font-semibold">{label}</p>
+                <p className={`font-serif text-3xl font-normal ${color}`}>
+                  {value}
+                </p>
+                <p className="text-muted-foreground mt-1 text-xs font-semibold">
+                  {label}
+                </p>
               </div>
             </div>
           ))}
@@ -304,35 +309,53 @@ function Content() {
         {currentlyReading.length > 0 && (
           <div className="bg-card border-border/40 flex flex-col gap-6 rounded-2xl border p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] lg:p-8">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-2xl font-normal">Currently Reading</h2>
+              <h2 className="font-serif text-2xl font-normal">
+                Currently Reading
+              </h2>
               <button className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-semibold transition-colors">
                 See all <ChevronRight size={16} />
               </button>
             </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {currentlyReading.map((book) => (
-                <Link key={book.id} href={`/book/${book.id}`}>
-                  <div className="group flex cursor-pointer items-center gap-5 rounded-xl p-3 transition-colors hover:bg-muted/50">
+                <Link key={book.id} href={`/book/${book.book.key}`}>
+                  <div className="group hover:bg-muted/50 flex cursor-pointer items-center gap-5 rounded-xl p-3 transition-colors">
                     <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-sm shadow-md transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg">
-                      <Image src={book.image} alt={book.title} fill className="object-cover" sizes="56px" />
+                      <Image
+                        src={book.book.image}
+                        alt={book.book.title}
+                        fill
+                        className="object-cover"
+                        sizes="56px"
+                      />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <div>
-                        <h3 className="text-foreground line-clamp-1 text-sm font-bold">{book.title}</h3>
-                        <p className="text-muted-foreground text-xs font-semibold italic">{book.author}</p>
+                        <h3 className="text-foreground line-clamp-1 text-sm font-bold">
+                          {book.book.title}
+                        </h3>
+                        <p className="text-muted-foreground text-xs font-semibold italic">
+                          {book.book.author.name}
+                        </p>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
-                          <div
-                            className="bg-primary h-full rounded-full transition-all duration-700"
-                            style={{ width: `${book.progress}%` }}
-                          />
+                        <div className="flex flex-col gap-1.5">
+                          <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
+                            <div
+                              className="bg-primary h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${Math.round((book.readPages! / book.book.pages) * 100)}%`,
+                              }}
+                            />
+                          </div>
+                          <div className="text-muted-foreground flex justify-between text-[11px] font-semibold">
+                            <span>
+                              Page {book.readPages} of {book.book.pages}
+                            </span>
+                            <span className="text-primary font-bold">
+                              {Math.round((book.readPages! / book.book.pages) * 100)}%
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-muted-foreground flex justify-between text-[11px] font-semibold">
-                          <span>Page {book.pagesRead} of {book.pages}</span>
-                          <span className="text-primary font-bold">{book.progress}%</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </Link>
@@ -370,7 +393,7 @@ function Content() {
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-sm font-semibold outline-none placeholder:font-normal w-44 placeholder:text-muted-foreground"
+                className="placeholder:text-muted-foreground w-44 bg-transparent text-sm font-semibold outline-none placeholder:font-normal"
               />
             </div>
             <button className="bg-card border-border/40 text-muted-foreground hover:text-foreground flex h-11 w-11 items-center justify-center rounded-full border shadow-sm transition-colors">
@@ -383,19 +406,25 @@ function Content() {
         </div>
 
         {/* Book Grid */}
-        {filteredBooks.length > 0 ? (
+        {filteredBooks && filteredBooks.length > 0 ? (
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
+              <BookCard key={book.book.key} book={book} />
             ))}
           </div>
         ) : (
           <div className="bg-card border-border/40 flex flex-col items-center justify-center gap-4 rounded-2xl border py-20 text-center">
-            <BookMarked size={40} className="text-muted-foreground/40" strokeWidth={1} />
+            <BookMarked
+              size={40}
+              className="text-muted-foreground/40"
+              strokeWidth={1}
+            />
             <div>
               <p className="font-serif text-xl font-normal">No books found</p>
               <p className="text-muted-foreground mt-1 text-sm font-semibold">
-                {searchQuery ? `No results for "${searchQuery}"` : "Add some books to get started"}
+                {searchQuery
+                  ? `No results for "${searchQuery}"`
+                  : "Add some books to get started"}
               </p>
             </div>
             <button className="bg-primary text-primary-foreground flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90">

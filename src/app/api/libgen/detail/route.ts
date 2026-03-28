@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import type { LibraryBook } from "~/types";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   const params = new URLSearchParams({
     q: `key:/works/${id}`,
     limit: "1",
-    fields: "key,title,author_name,first_publish_year,publisher,number_of_pages_median,ratings_average,ratings_count,cover_i,description,subject,isbn",
+    fields: "key,title,author_name,author_key,first_publish_year,publisher,number_of_pages_median,ratings_average,ratings_count,cover_i,description,subject,isbn",
   });
 
   try {
@@ -29,22 +30,26 @@ export async function GET(request: NextRequest) {
     if (!bookData) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
-    let extraData: any = {};
-    const book = {
-      id: bookData.key.replace("/works/", ""),
-      key: bookData.key,
-      title: bookData.title || extraData.title || null,
-      authors: bookData.author_name || extraData.authors || [],
-      releaseDate: bookData.first_publish_year || extraData.publishedDate?.split("-")[0] || null,
-      rating: bookData.ratings_average?.toFixed(1) || extraData.averageRating?.toFixed(1) || null,
-      ratingsCount: bookData.ratings_count || extraData.ratingsCount || null,
-      publisher: bookData.publisher?.[0] || extraData.publisher || null,
-      pages: bookData.number_of_pages_median || extraData.pageCount || null,
+
+    const book: LibraryBook = {
+      key: bookData.key.replace("/works/", ""),
+      title: bookData.title || "Unknown Title",
+      author: {
+        name: bookData.author_name?.[0] || "Unknown Author",
+        key: bookData.author_key?.[0] || "",
+      },
+      releaseDate: bookData.first_publish_year || null,
+      ratings: bookData.ratings_average?.toFixed(1) || 0,
+      publisher: bookData.publisher?.[0] || "N/A",
+      pages: bookData.number_of_pages_median || 0,
       image: bookData.cover_i
         ? `https://covers.openlibrary.org/b/id/${bookData.cover_i}-L.jpg`
-        : extraData.imageLinks?.thumbnail || null,
-      description: bookData?.description || extraData.description?.replace(/<[^>]*>?/gm, "") || "No description available.",
-      genres: bookData.subject?.slice(0, 4) || extraData.categories?.slice(0, 4) || [],
+        : "/placeholder-book.jpg",
+      description: bookData?.description || "No description available.",
+      genreList: (bookData.subject?.slice(0, 4) || []).map((s: string) => ({
+        key: s.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, ""),
+        name: s
+      }))
     };
 
     return NextResponse.json(book);
