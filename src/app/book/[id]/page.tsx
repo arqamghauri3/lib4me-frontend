@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { Bookmark, Share2, Download } from "lucide-react";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import type { Library, LibraryBook } from "~/types";
+import axios from "axios";
 const fetchBookDetail = async (id: string) => {
   const res = await fetch(`/api/libgen/detail?id=${id}`);
 
@@ -12,56 +14,73 @@ const fetchBookDetail = async (id: string) => {
   return res.json();
 };
 
-const fetchBookLg = async (query: string) => {
+const fetchBookLg = async (query: string | undefined) => {
   const res = await fetch(`/api/lg/search?req=${query}`);
 
   if (!res.ok) throw new Error("Fetch failed");
   return res.json();
 };
 const Page = () => {
+  const queryClient = useQueryClient();
   const params = useParams<{ id: string }>();
   const {
     data: booksData,
-    isPending,
+    isPending: isBookLoading,
     error,
-  } = useQuery({
+  } = useQuery<LibraryBook>({
     queryKey: ["book", params.id],
     queryFn: () => fetchBookDetail(params.id),
     enabled: !!params.id,
   });
 
-  const {
-    data: bookLg,
-  } = useQuery({
+  const { data: bookLg } = useQuery({
     queryKey: ["bookLg", booksData?.title],
     queryFn: () => fetchBookLg(booksData?.title),
     enabled: !!booksData?.title,
   });
 
-  useEffect(() => {
-    
-    console.log(booksData);
-    console.log(bookLg);
-  }, [booksData,bookLg]);
+  const { data: libraryBooks } = useQuery<Library>({
+    queryKey: ["libraryBooks"],
+    queryFn: async () => {
+      return (await fetch("/api/library")).json();
+    },
+  });
 
-  const book = {
-    id: booksData?.id,
-    name: booksData?.title || "Loading...",
-    author: Array.isArray(booksData?.authors)
-      ? booksData.authors.join(", ")
-      : booksData?.authors || "Unknown Author",
-    summary:"Loading description...",
-    description: booksData?.description || "",
-    image: booksData?.image || "/placeholder-book.jpg",
-    publisher: booksData?.publisher || "N/A",
-    language: booksData?.language || "English",
-    pages: booksData?.pages || "N/A",
-    releaseDate: booksData?.releaseDate || "N/A",
-    rating: booksData?.rating || "0.0",
-    ratingsCount: booksData?.ratingsCount || "0",
-    genres: booksData?.genres || [],
-    reviews: booksData?.reviews || [],
+  const addToLib = async (data: LibraryBook | undefined) => {
+    const res = await axios.post("/api/library", data);
+    return res;
   };
+  const { mutate: addBookToLib, isPending: isAdding } = useMutation({
+    mutationFn: addToLib,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["libraryBooks"] });
+    },
+  });
+
+  const bookCheck = libraryBooks?.books.filter(
+    (book) => book.book.key === booksData?.key,
+  );
+  const isBookinLib = !!libraryBooks && (bookCheck?.length ?? 0) === 0;
+
+  useEffect(() => {
+    // Sync logic if needed
+  }, [libraryBooks, booksData]);
+
+  const book: LibraryBook = {
+      key: booksData?.key || "",
+      title: booksData?.title || "Unknown Title",
+      author: {
+        name: booksData?.author.name || "Unknown Author",
+        key: booksData?.author.key || "",
+      },
+      releaseDate: booksData?.releaseDate || 0,
+      ratings: booksData?.ratings || 0,
+      publisher: booksData?.publisher || "N/A",
+      pages: booksData?.pages || 0,
+      image: booksData?.image || "",
+      description: booksData?.description || "No description available.",
+      genreList: booksData?.genreList || []
+    };
 
   return (
     <div className="bg-background text-foreground relative flex min-h-screen w-full flex-col pt-16 font-sans">
@@ -69,7 +88,7 @@ const Page = () => {
       <div className="z-10 mx-auto grid w-full max-w-7xl grid-cols-12 gap-8 px-8 lg:px-12">
         {/* Book Cover */}
         <div className="relative col-span-12 flex justify-center md:col-span-5 lg:col-span-4 lg:col-start-2 lg:justify-end">
-          <div className="relative z-20 w-[320px] h-[480px] shrink-0 overflow-hidden rounded-sm shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] transition-transform duration-500 hover:scale-[1.02]">
+          <div className="relative z-20 h-[480px] w-[320px] shrink-0 overflow-hidden rounded-sm shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] transition-transform duration-500 hover:scale-[1.02]">
             <Image
               src={book.image}
               alt="book cover"
@@ -82,9 +101,9 @@ const Page = () => {
         {/* Title, Author & Summary */}
         <div className="col-span-12 flex flex-col justify-center pt-4 md:col-span-7 md:pt-10 lg:col-span-6">
           <h1 className="mb-6 font-serif text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl lg:text-6xl">
-            {book.name}
+            {book.title}
           </h1>
-          <h3 className="mb-4 text-lg font-semibold">{book.author}</h3>
+          <h3 className="mb-4 text-lg font-semibold">{book.author.name}</h3>
         </div>
       </div>
 
@@ -95,18 +114,35 @@ const Page = () => {
             {/* Left Column (Stats & Actions) */}
             <div className="flex flex-col gap-10 lg:col-span-4">
               {/* Purchase / Actions */}
-              <div className="flex flex-col gap-4">
-                <button className="bg-primary text-primary-foreground flex w-full items-center justify-center rounded-full px-8 py-4 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]">
-                  Start reading instantly ↗
-                </button>
-                <button 
-                  onClick={() => bookLg?.downloadUrl && window.open(bookLg.downloadUrl, "_blank")}
-                  disabled={!bookLg?.downloadUrl}
-                  className="bg-secondary text-foreground hover:bg-muted border-border/50 flex w-full items-center justify-center rounded-full border px-8 py-4 text-sm font-semibold transition-colors disabled:opacity-50"
-                >
-                  {bookLg?.downloadUrl ? "Download Now" : "Searching for download..."}
-                </button>
-              </div>
+              {isBookinLib ? (
+                <div className="">
+                  <button
+                    onClick={() => addBookToLib(booksData)}
+                    disabled={isAdding || !booksData}
+                    className="cursor-pointer bg-primary text-primary-foreground flex w-full items-center justify-center rounded-full px-8 py-4 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    {isAdding ? "Adding..." : "Add to Library"}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <button className="cursor-pointer bg-primary text-primary-foreground flex w-full items-center justify-center rounded-full px-8 py-4 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]">
+                    Start reading instantly ↗
+                  </button>
+                  <button
+                    onClick={() =>
+                      bookLg?.downloadUrl &&
+                      window.open(bookLg.downloadUrl, "_blank")
+                    }
+                    disabled={!bookLg?.downloadUrl}
+                    className="cursor-pointer bg-secondary text-foreground hover:bg-muted border-border/50 flex w-full items-center justify-center rounded-full border px-8 py-4 text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {bookLg?.downloadUrl
+                      ? "Download Now"
+                      : "Searching for download..."}
+                  </button>
+                </div>
+              )}
 
               <div className="border-border/60 border-t pt-8">
                 <h4 className="text-muted-foreground mb-5 text-xs font-bold tracking-wider uppercase">
@@ -114,13 +150,17 @@ const Page = () => {
                 </h4>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="font-serif text-3xl font-normal">{book.rating}</p>
+                    <p className="font-serif text-3xl font-normal">
+                      {book.ratings}
+                    </p>
                     <p className="text-foreground/70 mt-1 text-xs font-semibold">
-                      Av. Rating ({book.ratingsCount})
+                      Av. Rating ({book.ratings})
                     </p>
                   </div>
                   <div>
-                    <p className="font-serif text-3xl font-normal">{book.releaseDate}</p>
+                    <p className="font-serif text-3xl font-normal">
+                      {book.releaseDate}
+                    </p>
                     <p className="text-foreground/70 mt-1 text-xs font-semibold">
                       Release Year
                     </p>
@@ -177,7 +217,7 @@ const Page = () => {
                       Language
                     </h4>
                     <p className="text-foreground/90 text-[15px] leading-relaxed font-semibold">
-                      {book.language}
+                      English
                     </p>
                   </div>
                 </div>
@@ -196,25 +236,23 @@ const Page = () => {
                       Tags
                     </h4>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {book.genres.length > 0 ? (
-                        book.genres.map((t: string) => (
-                          <span
-                            key={t}
-                            className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
-                          >
-                            {t}
-                          </span>
-                        ))
-                      ) : (
-                        ["Fantasy", "Fiction"].map((t) => (
-                          <span
-                            key={t}
-                            className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
-                          >
-                            {t}
-                          </span>
-                        ))
-                      )}
+                      {book.genreList.length > 0
+                        ? book.genreList.map((t:any) => (
+                            <span
+                              key={t.key}
+                              className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
+                            >
+                              {t.name}
+                            </span>
+                          ))
+                        : ["Fantasy", "Fiction"].map((t: string) => (
+                            <span
+                              key={t}
+                              className="bg-secondary text-foreground border-border/50 rounded-full border px-4 py-1.5 text-xs font-bold"
+                            >
+                              {t}
+                            </span>
+                          ))}
                     </div>
                   </div>
                 </div>
