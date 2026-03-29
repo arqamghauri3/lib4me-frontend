@@ -59,11 +59,12 @@ const RegisterForm = () => {
     mutation.mutate(data);
   };
   return (
-    <section className="bg-background dark:bg-foreground relative flex min-h-screen items-center justify-center">
+    <section className="bg-foreground dark:bg-background relative flex min-h-screen items-center justify-center w-full">
       <div className="pointer-events-none absolute inset-0 right-0 hidden overflow-hidden md:block">
         {/* Outer big circle */}
         <div className="absolute top-0 left-1/1 h-650 w-650 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10" />
         {/* Inner circle */}
+        <div className="bg-foreground dark:bg-background absolute top-0 left-1/1 h-175 w-175 -translate-x-1/2 -translate-y-1/2 rounded-full" />
       </div>
 
       <div className="mx-auto w-full max-w-lg px-4 py-10 sm:px-0 md:py-20">

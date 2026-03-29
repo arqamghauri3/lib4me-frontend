@@ -61,7 +61,7 @@ const LoginForm = () => {
   };
 
   return (
-    <section className="bg-foreground dark:bg-background relative flex min-h-screen items-center justify-center">
+    <section className="bg-foreground dark:bg-background relative flex min-h-screen items-center justify-center w-full">
       <div className="pointer-events-none absolute inset-0 right-0 hidden overflow-hidden md:block">
         {/* Outer big circle */}
         <div className="absolute top-0 left-1/1 h-650 w-650 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10" />
