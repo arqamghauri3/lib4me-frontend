@@ -1,9 +1,5 @@
 import "~/styles/globals.css";
-
 import { type Metadata } from "next";
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
-import { AppSidebar } from "~/components/dashboard/Sidebar";
-import Topbar from "~/components/dashboard/Topbar";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
@@ -19,13 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans">
         <Providers>
-          <AppSidebar />
-          <main className="flex h-screen w-full flex-col">
-            <div className="bg-background flex w-full py-4">
-              <Topbar />
-            </div>
-            {children}
-          </main>
+          {children}
         </Providers>
       </body>
     </html>

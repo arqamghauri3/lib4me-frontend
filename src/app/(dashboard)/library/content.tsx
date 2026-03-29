@@ -17,8 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Library, LibraryBooks } from "~/types";
-
-
+import { Spinner } from "~/components/ui/spinner";
 
 const dummyBooks: LibraryBooks[] = [
   {
@@ -33,7 +32,8 @@ const dummyBooks: LibraryBooks[] = [
       key: "OL7353617M",
       author: { name: "J.K. Rowling", key: "OL23919A" },
       image: "https://covers.openlibrary.org/b/id/8234817-L.jpg",
-      description: "Harry Potter and the Half-Blood Prince is a fantasy novel...",
+      description:
+        "Harry Potter and the Half-Blood Prince is a fantasy novel...",
       pages: 607,
       ratings: 4.6,
       releaseDate: 2005,
@@ -51,14 +51,14 @@ const dummyBooks: LibraryBooks[] = [
     book: {
       title: "The Name of the Wind",
       key: "OL8479946M",
-      author: {  name: "Patrick Rothfuss", key: "OL4336142A" },
+      author: { name: "Patrick Rothfuss", key: "OL4336142A" },
       image: "https://covers.openlibrary.org/b/id/8235174-L.jpg",
       description: "The Name of the Wind is a heroic fantasy novel...",
       pages: 662,
       ratings: 4.5,
       releaseDate: 2007,
       publisher: "DAW Books",
-      genreList: [{  name: "Fantasy", key: "fantasy" }],
+      genreList: [{ name: "Fantasy", key: "fantasy" }],
     },
   },
   {
@@ -71,14 +71,14 @@ const dummyBooks: LibraryBooks[] = [
     book: {
       title: "Dune",
       key: "OL44247403M",
-      author: {  name: "Frank Herbert", key: "OL21516A" },
+      author: { name: "Frank Herbert", key: "OL21516A" },
       image: "https://covers.openlibrary.org/b/id/8225263-L.jpg",
       description: "Dune is a science fiction novel...",
       pages: 412,
       ratings: 4.8,
       releaseDate: 1965,
       publisher: "Chilton Books",
-      genreList: [{  name: "Sci-Fi", key: "sci-fi" }],
+      genreList: [{ name: "Sci-Fi", key: "sci-fi" }],
     },
   },
 ];
@@ -117,11 +117,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function BookCard({
-  book,
-}: {
-  book: LibraryBooks;
-}) {
+function BookCard({ book }: { book: LibraryBooks }) {
   const status = statusConfig[book.status];
   return (
     <Link href={`/book/${book.book.key}`}>
@@ -212,12 +208,13 @@ function BookCard({
 }
 
 function Content() {
-  const { data: libraryBooks } = useQuery<Library>({
-    queryKey: ["libraryBooks"],
-    queryFn: async () => {
-      return (await fetch("/api/library")).json();
-    },
-  });
+  const { data: libraryBooks, isLoading: loadingLibraryBooks } =
+    useQuery<Library>({
+      queryKey: ["libraryBooks"],
+      queryFn: async () => {
+        return (await fetch("/api/library")).json();
+      },
+    });
 
   useEffect(() => {
     console.log(libraryBooks);
@@ -316,51 +313,62 @@ function Content() {
                 See all <ChevronRight size={16} />
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {currentlyReading.map((book) => (
-                <Link key={book.id} href={`/book/${book.book.key}`}>
-                  <div className="group hover:bg-muted/50 flex cursor-pointer items-center gap-5 rounded-xl p-3 transition-colors">
-                    <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-sm shadow-md transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg">
-                      <Image
-                        src={book.book.image}
-                        alt={book.book.title}
-                        fill
-                        className="object-cover"
-                        sizes="56px"
-                      />
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
-                      <div>
-                        <h3 className="text-foreground line-clamp-1 text-sm font-bold">
-                          {book.book.title}
-                        </h3>
-                        <p className="text-muted-foreground text-xs font-semibold italic">
-                          {book.book.author.name}
-                        </p>
-                      </div>
-                        <div className="flex flex-col gap-1.5">
-                          <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
-                            <div
-                              className="bg-primary h-full rounded-full transition-all duration-700"
-                              style={{
-                                width: `${Math.round((book.readPages! / book.book.pages) * 100)}%`,
-                              }}
-                            />
+            {loadingLibraryBooks ? (
+              <div className="flex h-1/2 items-center justify-center">
+                <Spinner className="size-10" height={15} />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {currentlyReading.map((book) => (
+                    <Link key={book.id} href={`/book/${book.book.key}`}>
+                      <div className="group hover:bg-muted/50 flex cursor-pointer items-center gap-5 rounded-xl p-3 transition-colors">
+                        <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-sm shadow-md transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg">
+                          <Image
+                            src={book.book.image}
+                            alt={book.book.title}
+                            fill
+                            className="object-cover"
+                            sizes="56px"
+                          />
+                        </div>
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <div>
+                            <h3 className="text-foreground line-clamp-1 text-sm font-bold">
+                              {book.book.title}
+                            </h3>
+                            <p className="text-muted-foreground text-xs font-semibold italic">
+                              {book.book.author.name}
+                            </p>
                           </div>
-                          <div className="text-muted-foreground flex justify-between text-[11px] font-semibold">
-                            <span>
-                              Page {book.readPages} of {book.book.pages}
-                            </span>
-                            <span className="text-primary font-bold">
-                              {Math.round((book.readPages! / book.book.pages) * 100)}%
-                            </span>
+                          <div className="flex flex-col gap-1.5">
+                            <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
+                              <div
+                                className="bg-primary h-full rounded-full transition-all duration-700"
+                                style={{
+                                  width: `${Math.round((book.readPages! / book.book.pages) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                            <div className="text-muted-foreground flex justify-between text-[11px] font-semibold">
+                              <span>
+                                Page {book.readPages} of {book.book.pages}
+                              </span>
+                              <span className="text-primary font-bold">
+                                {Math.round(
+                                  (book.readPages! / book.book.pages) * 100,
+                                )}
+                                %
+                              </span>
+                            </div>
                           </div>
                         </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -406,31 +414,41 @@ function Content() {
         </div>
 
         {/* Book Grid */}
-        {filteredBooks && filteredBooks.length > 0 ? (
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filteredBooks.map((book) => (
-              <BookCard key={book.book.key} book={book} />
-            ))}
+        {loadingLibraryBooks ? (
+          <div className="flex h-1/2 items-center justify-center">
+            <Spinner className="size-10" height={15} />
           </div>
         ) : (
-          <div className="bg-card border-border/40 flex flex-col items-center justify-center gap-4 rounded-2xl border py-20 text-center">
-            <BookMarked
-              size={40}
-              className="text-muted-foreground/40"
-              strokeWidth={1}
-            />
-            <div>
-              <p className="font-serif text-xl font-normal">No books found</p>
-              <p className="text-muted-foreground mt-1 text-sm font-semibold">
-                {searchQuery
-                  ? `No results for "${searchQuery}"`
-                  : "Add some books to get started"}
-              </p>
-            </div>
-            <button className="bg-primary text-primary-foreground flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90">
-              <Plus size={16} /> Add Books
-            </button>
-          </div>
+          <>
+            {filteredBooks && filteredBooks.length > 0 ? (
+              <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {filteredBooks.map((book) => (
+                  <BookCard key={book.book.key} book={book} />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-card border-border/40 flex flex-col items-center justify-center gap-4 rounded-2xl border py-20 text-center">
+                <BookMarked
+                  size={40}
+                  className="text-muted-foreground/40"
+                  strokeWidth={1}
+                />
+                <div>
+                  <p className="font-serif text-xl font-normal">
+                    No books found
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-sm font-semibold">
+                    {searchQuery
+                      ? `No results for "${searchQuery}"`
+                      : "Add some books to get started"}
+                  </p>
+                </div>
+                <button className="bg-primary text-primary-foreground flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90">
+                  <Plus size={16} /> Add Books
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
