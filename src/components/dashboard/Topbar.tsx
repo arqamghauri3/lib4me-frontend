@@ -1,7 +1,9 @@
+"use client"
 import React from "react";
 import { Field, FieldDescription, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Bell, Moon, Search, UserCircleIcon } from "lucide-react";
+import { DropdownMenuAvatar } from "../ui/dropdown-menu-avatar";
 
 function Topbar() {
   return (
@@ -20,7 +22,7 @@ function Topbar() {
       <div id="profile" className="flex gap-2">
         <Moon />
         <Bell />
-        <UserCircleIcon />
+        <DropdownMenuAvatar />
       </div>
     </div>
   );
