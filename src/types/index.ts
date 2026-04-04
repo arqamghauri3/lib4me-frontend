@@ -26,7 +26,7 @@ export type LibraryBook = {
 export type LibraryBooks = {
   id: number;
   book: LibraryBook;
-  status: "READING" | "completed" | "want-to-read";
+  status: "READING" | "COMPLETED" | "WANT_TO_READ";
   startedAt: string | null;
   finishedAt: string | null;
   readPages: number | null;

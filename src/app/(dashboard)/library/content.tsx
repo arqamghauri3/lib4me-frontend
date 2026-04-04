@@ -18,6 +18,15 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Library, LibraryBooks } from "~/types";
 import { Spinner } from "~/components/ui/spinner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 const dummyBooks: LibraryBooks[] = [
   {
@@ -63,7 +72,7 @@ const dummyBooks: LibraryBooks[] = [
   },
   {
     id: 3,
-    status: "completed",
+    status: "COMPLETED",
     startedAt: "2026-01-01",
     finishedAt: "2026-01-15",
     readPages: 412,
@@ -86,8 +95,8 @@ const dummyBooks: LibraryBooks[] = [
 const filterTabs = [
   { key: "all", label: "All Books", icon: BookMarked },
   { key: "READING", label: "Reading", icon: BookOpen },
-  { key: "completed", label: "Completed", icon: CheckCircle2 },
-  { key: "want-to-read", label: "Want to Read", icon: Clock },
+  { key: "COMPLETED", label: "Completed", icon: CheckCircle2 },
+  { key: "WANT_TO_READ", label: "Want to Read", icon: Clock },
 ];
 
 const statusConfig = {
@@ -96,12 +105,12 @@ const statusConfig = {
     color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     dot: "bg-blue-500",
   },
-  completed: {
+  COMPLETED: {
     label: "Completed",
     color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     dot: "bg-emerald-500",
   },
-  "want-to-read": {
+  WANT_TO_READ: {
     label: "Want to Read",
     color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     dot: "bg-amber-500",
@@ -144,12 +153,28 @@ function BookCard({ book }: { book: LibraryBooks }) {
             </span>
           </div>
           {/* More button */}
-          <button
-            onClick={(e) => e.preventDefault()}
-            className="bg-card/80 border-border/40 absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
-          >
-            <MoreHorizontal size={14} />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => e.preventDefault()}
+                className="bg-card/80 cursor-pointer border-border/40 absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Reading</DropdownMenuLabel>
+                <DropdownMenuItem>Completed</DropdownMenuItem>
+                <DropdownMenuItem></DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>GitHub</DropdownMenuItem>
+              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem disabled>API</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Info */}
@@ -191,12 +216,12 @@ function BookCard({ book }: { book: LibraryBooks }) {
               </div>
             </div>
           )}
-          {book.status === "completed" && (
+          {book.status === "COMPLETED" && (
             <div className="text-muted-foreground mt-0.5 text-[10px] font-semibold">
               {book.book.pages} pages · Finished
             </div>
           )}
-          {book.status === "want-to-read" && (
+          {book.status === "WANT_TO_READ" && (
             <div className="text-muted-foreground mt-0.5 text-[10px] font-semibold">
               {book.book.pages} pages
             </div>
@@ -235,10 +260,10 @@ function Content() {
   const stats = {
     total: books.length,
     reading: books.filter((b) => b.status === "READING").length,
-    completed: books.filter((b) => b.status === "completed").length,
-    wantToRead: books.filter((b) => b.status === "want-to-read").length,
+    completed: books.filter((b) => b.status === "COMPLETED").length,
+    wantToRead: books.filter((b) => b.status === "WANT_TO_READ").length,
     totalPagesRead: books
-      .filter((b) => b.status === "completed")
+      .filter((b) => b.status === "COMPLETED")
       .reduce((acc, b) => acc + b.book.pages, 0),
   };
 
